@@ -588,7 +588,7 @@ __kernel void cn1_monero(__global uint4 *Scratchpad, __global ulong *states, ulo
             ((uint4 *)c)[0] = AES_Round(AES0, AES1, AES2, AES3, ((uint4 *)c)[0], ((uint4 *)a)[0]);
 
             b_x ^= ((uint4 *)c)[0];
-            VARIANT1_1_XTL(b_x);
+            VARIANT1_1(b_x);
             Scratchpad[IDX((a[0] & MASK) >> 4)] = b_x;
 
             uint4 tmp;
@@ -598,13 +598,21 @@ __kernel void cn1_monero(__global uint4 *Scratchpad, __global ulong *states, ulo
             a[0] += mul_hi(c[0], as_ulong2(tmp).s0);
 
             uint2 tweak1_2_0 = tweak1_2;
-            if (variant == VARIANT_RTO) {
-                tweak1_2_0 ^= ((uint2 *)&(a[0]))[0];
-            }
+            
+			ulong twit = a[0];
 
-            VARIANT1_2(a[1]);
+			uchar tmp2 = ((uchar*)(&a))[1]; 
+			uint table2 = 0x75310;
+			uint8_t index2 = (((tmp2 >> 3) & 6) | (tmp2 & 1)) << 1;
+			((uint8_t*)(&a))[1] = tmp2 ^ ((table2 >> index2) & 0x33);
+
             Scratchpad[IDX((c[0] & MASK) >> 4)] = ((uint4 *)a)[0];
-            VARIANT1_2(a[1]);
+
+            a[0] = twit;
+
+            
+            Scratchpad[IDX((c[0] & MASK) >> 4)] = ((uint4 *)a)[0];
+            
 
             ((uint4 *)a)[0] ^= tmp;
 

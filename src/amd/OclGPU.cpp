@@ -119,11 +119,11 @@ size_t InitOpenCLGpu(int index, cl_context opencl_ctx, GpuContext* ctx, const ch
 {
     size_t MaximumWorkSize;
     cl_int ret;
-
+printf("gpu init start, dvice id= %d\n", ctx->DeviceID);
     if (OclLib::getDeviceInfo(ctx->DeviceID, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), &MaximumWorkSize) != CL_SUCCESS) {
         return OCL_ERR_API;
     }
-
+	printf("getdevice start \n");
     char buf[128] = { 0 };
     getDeviceName(ctx->DeviceID, buf, sizeof(buf));
     ctx->computeUnits = getDeviceMaxComputeUnits(ctx->DeviceID);
@@ -337,18 +337,20 @@ int getAMDPlatformIdx(xmrig::Config *config)
 // Returns 0 on success, -1 on stupid params, -2 on OpenCL API error
 size_t InitOpenCL(GpuContext* ctx, size_t num_gpus, xmrig::Config *config)
 {
-    const size_t platform_idx = config->platformIndex();
+	LOG_ERR("start");
+	const size_t platform_idx = config->platformIndex();
     cl_uint entries           = getNumPlatforms();
     if (entries == 0) {
+		LOG_ERR("gpu num platform");
         return OCL_ERR_API;
     }
-
+	LOG_ERR("gpu num platform");
     // The number of platforms naturally is the index of the last platform plus one.
     if (entries <= platform_idx) {
         LOG_ERR("Selected OpenCL platform index %d doesn't exist.", platform_idx);
         return OCL_ERR_BAD_PARAMS;
     }
-
+	LOG_ERR("platform");
     cl_platform_id *platforms = new cl_platform_id[entries];
     OclLib::getPlatformIDs(entries, platforms, nullptr);
 
@@ -358,7 +360,7 @@ size_t InitOpenCL(GpuContext* ctx, size_t num_gpus, xmrig::Config *config)
     if (strstr(buf, "Advanced Micro Devices") == nullptr) {
         LOG_WARN("using non AMD device: %s", buf);
     }
-
+	LOG_ERR("flute");
     delete [] platforms;
 
     /*MSVC skimping on devel costs by shoehorning C99 to be a subset of C++? Noooo... can't be.*/
